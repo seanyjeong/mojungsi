@@ -173,9 +173,9 @@ export default function RatiosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           suneung,
-          naeshin,
-          silgi,
-          silgi_total: silgiTotal,
+          naesin: naeshin,
+          practical: silgi,
+          practical_total: silgiTotal,
         }),
       });
       return (await res.json()).success;

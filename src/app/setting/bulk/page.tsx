@@ -136,19 +136,19 @@ export default function BulkPage() {
         if (row.대학명 !== undefined) item.univ_name = String(row.대학명);
         if (row.학과명 !== undefined) item.dept_name = String(row.학과명);
         if (row.군 !== undefined) item.gun = String(row.군);
-        if (row.모집정원 !== undefined) item.mojip = String(row.모집정원);
+        if (row.모집정원 !== undefined) item.quota = String(row.모집정원);
 
         // Ratios
         if (row.수능비율 !== undefined) item.suneung = String(row.수능비율);
-        if (row.내신비율 !== undefined) item.naeshin = String(row.내신비율);
-        if (row.실기비율 !== undefined) item.silgi = String(row.실기비율);
+        if (row.내신비율 !== undefined) item.naesin = String(row.내신비율);
+        if (row.실기비율 !== undefined) item.practical = String(row.실기비율);
 
         // Subject ratios
         if (row.국어 !== undefined && row.국어 !== "") item.korean = Number(row.국어);
         if (row.수학 !== undefined && row.수학 !== "") item.math = Number(row.수학);
         if (row.영어 !== undefined && row.영어 !== "") item.english = Number(row.영어);
-        if (row.탐구 !== undefined && row.탐구 !== "") item.tamgu = Number(row.탐구);
-        if (row.탐구수 !== undefined && row.탐구수 !== "") item.tamgu_cnt = Number(row.탐구수);
+        if (row.탐구 !== undefined && row.탐구 !== "") item.inquiry = Number(row.탐구);
+        if (row.탐구수 !== undefined && row.탐구수 !== "") item.inquiry_count = Number(row.탐구수);
 
         // English scores (only if any are set)
         const engScores: Record<string, number> = {};

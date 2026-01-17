@@ -125,8 +125,8 @@ export default function BasicInfoPage() {
         setEditUnivName(basic.univ_name || "");
         setEditDeptName(basic.dept_name || "");
         setEditGun(basic.gun || "");
-        setEditHyungtae(basic.hyungtae || "");
-        setEditMojip(basic.mojip || "");
+        setEditHyungtae(basic.type || "");
+        setEditMojip(basic.quota || "");
       }
     } catch (error) {
       console.error("Failed to load university details:", error);
@@ -147,8 +147,8 @@ export default function BasicInfoPage() {
           univ_name: editUnivName,
           dept_name: editDeptName,
           gun: editGun,
-          hyungtae: editHyungtae,
-          mojip: editMojip,
+          type: editHyungtae,
+          quota: editMojip,
         }),
       });
 
