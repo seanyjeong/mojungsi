@@ -23,10 +23,13 @@ export default function CopyYearPage() {
       const res = await fetch(`${API_BASE}/admin/jungsi/copy-year`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fromYearId: fromYear, toYearId: toYear }),
+        body: JSON.stringify({ fromYear, toYear }),
       });
 
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "복사 실패");
+      }
       setResult(data);
     } catch (error) {
       console.error("Failed to copy:", error);
