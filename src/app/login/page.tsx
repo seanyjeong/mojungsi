@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,8 +30,9 @@ export default function LoginPage() {
       const data = await res.json();
       localStorage.setItem("admin_token", data.access_token);
       localStorage.setItem("admin_user", JSON.stringify(data.user));
-      router.push("/");
-    } catch {
+      window.location.href = "/";
+    } catch (err) {
+      console.error("로그인 에러:", err);
       setError("아이디 또는 비밀번호가 올바르지 않습니다.");
     } finally {
       setLoading(false);

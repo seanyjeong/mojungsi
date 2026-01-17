@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Copy, ArrowRight } from "lucide-react";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
 export default function CopyYearPage() {
   const [fromYear, setFromYear] = useState(2026);
@@ -20,7 +20,7 @@ export default function CopyYearPage() {
     setResult(null);
 
     try {
-      const res = await fetch(`${API_BASE}/admin/formula-configs/copy-year`, {
+      const res = await fetch(`${API_BASE}/admin/jungsi/copy-year`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fromYearId: fromYear, toYearId: toYear }),

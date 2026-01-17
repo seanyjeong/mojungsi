@@ -5,7 +5,7 @@ import { Download, Upload, ArrowLeft, FileSpreadsheet, AlertCircle, CheckCircle 
 import Link from "next/link";
 import * as XLSX from "xlsx";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
 interface ExportRow {
   U_ID: number;

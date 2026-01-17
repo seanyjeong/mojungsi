@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, Save, Plus, Trash2, ChevronDown, ChevronUp, FileSpreadsheet, Settings2, Percent } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
 // 초성 목록
 const KOREAN_CONSONANTS = "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ".split("");
