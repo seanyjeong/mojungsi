@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
 interface Stats {
   total: number;
@@ -16,24 +16,21 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${API_BASE}/admin/formula-configs`);
-        const data = await res.json();
+        // Fetch data for each year
+        const years = [2025, 2026, 2027];
+        const results = await Promise.all(
+          years.map(async (year) => {
+            const res = await fetch(`${API_BASE}/admin/jungsi/basic?year=${year}`);
+            const data = await res.json();
+            return { year, count: data.count || 0 };
+          })
+        );
 
-        // Calculate stats
-        const byYear = data.reduce((acc: Record<number, number>, item: any) => {
-          const year = item.departments?.year_id;
-          if (year) {
-            acc[year] = (acc[year] || 0) + 1;
-          }
-          return acc;
-        }, {});
+        const total = results.reduce((sum, r) => sum + r.count, 0);
 
         setStats({
-          total: data.length,
-          byYear: Object.entries(byYear).map(([year, count]) => ({
-            year: Number(year),
-            count: count as number,
-          })).sort((a, b) => a.year - b.year),
+          total,
+          byYear: results.filter(r => r.count > 0).sort((a, b) => a.year - b.year),
         });
       } catch (error) {
         console.error("Failed to fetch stats:", error);
