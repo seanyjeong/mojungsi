@@ -532,49 +532,29 @@ export default function SettingPage() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">전체 계산 방식</label>
-                      <div className="flex gap-2">
-                        {["환산", "직접"].map((m) => (
-                          <button
-                            key={m}
-                            onClick={() => setCalcMethod(m)}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
-                              calcMethod === m
-                                ? "bg-blue-600 text-white"
-                                : "bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200"
-                            }`}
-                          >
-                            {m} 계산
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">총점 (만점)</label>
-                      <div className="flex gap-2 flex-wrap">
-                        {[1000, 500, 300].map((t) => (
-                          <button
-                            key={t}
-                            onClick={() => { setTotalScore(t); setCustomTotal(""); }}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                              totalScore === t
-                                ? "bg-blue-600 text-white"
-                                : "bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200"
-                            }`}
-                          >
-                            {t}
-                          </button>
-                        ))}
-                        <input
-                          type="number"
-                          placeholder="직접입력"
-                          value={customTotal}
-                          onChange={(e) => { setCustomTotal(e.target.value); setTotalScore(-1); }}
-                          className="w-24 px-3 py-2 border rounded-lg text-sm"
-                        />
-                      </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">총점 (만점)</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {[1000, 500, 300].map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => { setTotalScore(t); setCustomTotal(""); }}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                            totalScore === t
+                              ? "bg-blue-600 text-white"
+                              : "bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                      <input
+                        type="number"
+                        placeholder="직접입력"
+                        value={customTotal}
+                        onChange={(e) => { setCustomTotal(e.target.value); setTotalScore(-1); }}
+                        className="w-24 px-3 py-2 border rounded-lg text-sm"
+                      />
                     </div>
                   </div>
                 </div>
