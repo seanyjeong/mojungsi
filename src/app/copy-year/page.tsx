@@ -9,7 +9,11 @@ export default function CopyYearPage() {
   const [fromYear, setFromYear] = useState(2026);
   const [toYear, setToYear] = useState(2027);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ copied: number; skipped: number; errors: string[] } | null>(null);
+  const [result, setResult] = useState<{
+    success: boolean;
+    message: string;
+    copiedCount?: { basic: number; ratio: number; conv: number; practical: number };
+  } | null>(null);
 
   const handleCopy = async () => {
     if (!confirm(`${fromYear}학년도 데이터를 ${toYear}학년도로 복사하시겠습니까?`)) {
@@ -33,7 +37,7 @@ export default function CopyYearPage() {
       setResult(data);
     } catch (error) {
       console.error("Failed to copy:", error);
-      setResult({ copied: 0, skipped: 0, errors: ["복사 중 오류가 발생했습니다."] });
+      setResult({ success: false, message: error instanceof Error ? error.message : "복사 중 오류가 발생했습니다." });
     } finally {
       setLoading(false);
     }
@@ -104,26 +108,39 @@ export default function CopyYearPage() {
       </div>
 
       {result && (
-        <div className="mt-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="font-semibold text-zinc-900 dark:text-white mb-4">복사 결과</h3>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-              <p className="text-sm text-green-600 dark:text-green-400">복사됨</p>
-              <p className="text-2xl font-bold text-green-700 dark:text-green-300">{result.copied}개</p>
-            </div>
-            <div className="bg-zinc-50 dark:bg-zinc-700 rounded-lg p-4">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">건너뜀 (이미 존재)</p>
-              <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{result.skipped}개</p>
-            </div>
-          </div>
-          {result.errors.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4">
-              <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">오류</p>
-              <ul className="text-sm text-red-500 space-y-1">
-                {result.errors.map((err, i) => (
-                  <li key={i}>{err}</li>
-                ))}
-              </ul>
+        <div className={`mt-6 rounded-xl border p-6 ${
+          result.success
+            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+        }`}>
+          <h3 className={`font-semibold mb-2 ${
+            result.success ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
+          }`}>
+            {result.success ? "복사 완료" : "복사 실패"}
+          </h3>
+          <p className={`text-sm ${
+            result.success ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+          }`}>
+            {result.message}
+          </p>
+          {result.copiedCount && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              <div className="bg-white dark:bg-zinc-800 rounded-lg p-3">
+                <p className="text-xs text-zinc-500">기본정보</p>
+                <p className="text-lg font-bold text-zinc-900 dark:text-white">{result.copiedCount.basic}개</p>
+              </div>
+              <div className="bg-white dark:bg-zinc-800 rounded-lg p-3">
+                <p className="text-xs text-zinc-500">비율정보</p>
+                <p className="text-lg font-bold text-zinc-900 dark:text-white">{result.copiedCount.ratio}개</p>
+              </div>
+              <div className="bg-white dark:bg-zinc-800 rounded-lg p-3">
+                <p className="text-xs text-zinc-500">문의환산표</p>
+                <p className="text-lg font-bold text-zinc-900 dark:text-white">{result.copiedCount.conv}개</p>
+              </div>
+              <div className="bg-white dark:bg-zinc-800 rounded-lg p-3">
+                <p className="text-xs text-zinc-500">실기정보</p>
+                <p className="text-lg font-bold text-zinc-900 dark:text-white">{result.copiedCount.practical}개</p>
+              </div>
             </div>
           )}
         </div>
