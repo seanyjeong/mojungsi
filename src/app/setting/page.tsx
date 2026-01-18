@@ -90,6 +90,9 @@ export default function SettingPage() {
   const [calcMethod, setCalcMethod] = useState("환산");
   const [totalScore, setTotalScore] = useState(1000);
   const [customTotal, setCustomTotal] = useState("");
+  const [suneungRatio, setSuneungRatio] = useState(100);
+  const [naesinRatio, setNaesinRatio] = useState(0);
+  const [silgiRatio, setSilgiRatio] = useState(0);
 
   // Score config
   const [kmType, setKmType] = useState("백분위");
@@ -210,6 +213,9 @@ export default function SettingPage() {
         setSpecialFormula(ratio.특수공식 || "");
         setCalcMethod(ratio.calc_method || "환산");
         setTotalScore(ratio.총점 || 1000);
+        setSuneungRatio(ratio.수능비율 || 100);
+        setNaesinRatio(ratio.내신비율 || 0);
+        setSilgiRatio(ratio.실기비율 || 0);
         setEtcNote("");
 
         // Score config
@@ -320,6 +326,11 @@ export default function SettingPage() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ note: etcNote }),
+        }),
+        fetch(`${API_BASE}/admin/jungsi/ratio/${uid}/main-ratios`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ suneung: suneungRatio, naesin: naesinRatio, practical: silgiRatio }),
         }),
       ]);
 
@@ -555,6 +566,41 @@ export default function SettingPage() {
                         onChange={(e) => { setCustomTotal(e.target.value); setTotalScore(-1); }}
                         className="w-24 px-3 py-2 border rounded-lg text-sm"
                       />
+                    </div>
+                  </div>
+
+                  {/* 수능/내신/실기 비율 */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">반영 비율 (수능 / 내신 / 실기)</label>
+                    <div className="flex gap-2 items-center">
+                      <div className="flex-1">
+                        <label className="text-xs text-zinc-500">수능</label>
+                        <input
+                          type="number"
+                          value={suneungRatio}
+                          onChange={(e) => setSuneungRatio(Number(e.target.value))}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs text-zinc-500">내신</label>
+                        <input
+                          type="number"
+                          value={naesinRatio}
+                          onChange={(e) => setNaesinRatio(Number(e.target.value))}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs text-zinc-500">실기</label>
+                        <input
+                          type="number"
+                          value={silgiRatio}
+                          onChange={(e) => setSilgiRatio(Number(e.target.value))}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      <span className="text-sm text-zinc-500">= {suneungRatio + naesinRatio + silgiRatio}%</span>
                     </div>
                   </div>
                 </div>
