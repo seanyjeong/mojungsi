@@ -1,14 +1,91 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Settings, FileSpreadsheet, Percent, Settings2, Database } from "lucide-react";
+import { Settings, FileSpreadsheet, Percent, Settings2, Database, Calendar, Check } from "lucide-react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
 export default function Home() {
+  const [activeYear, setActiveYear] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // 활성 연도 조회
+  useEffect(() => {
+    fetch(`${API_BASE}/admin/jungsi/active-year`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setActiveYear(data.activeYear);
+      })
+      .catch(console.error);
+  }, []);
+
+  // 활성 연도 변경
+  const handleYearChange = async (year: number) => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/admin/jungsi/active-year`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActiveYear(data.activeYear);
+        setMessage(`활성 연도가 ${data.activeYear}년으로 변경되었습니다.`);
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-12">
+      <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">정시 관리자</h1>
         <p className="text-zinc-500 dark:text-zinc-400">대학별 정시 환산점수 계산 설정을 관리합니다</p>
+      </div>
+
+      {/* 활성 연도 설정 - 상단 고정 */}
+      <div className="mb-8 p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl text-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/20 rounded-lg">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">활성 연도 설정</h2>
+              <p className="text-sm text-white/80">학생용 앱에서 사용할 연도를 선택하세요</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {[2026, 2027, 2028].map((year) => (
+              <button
+                key={year}
+                onClick={() => handleYearChange(year)}
+                disabled={saving}
+                className={`px-5 py-2.5 rounded-lg font-medium transition ${
+                  activeYear === year
+                    ? "bg-white text-indigo-600 shadow-lg"
+                    : "bg-white/20 hover:bg-white/30"
+                }`}
+              >
+                {activeYear === year && <Check className="w-4 h-4 inline mr-1" />}
+                {year}
+              </button>
+            ))}
+          </div>
+        </div>
+        {message && (
+          <div className="mt-3 text-sm bg-white/20 rounded-lg px-4 py-2">
+            {message}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
