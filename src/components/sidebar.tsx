@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Copy, BarChart, LogOut } from "lucide-react";
+import { Building2, Copy, BarChart, LogOut, Dumbbell, BookOpen, Target } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export function Sidebar() {
@@ -21,6 +21,9 @@ export function Sidebar() {
 
   const navItems = [
     { href: "/", label: "대학/학과 관리", icon: Building2 },
+    { href: "/practical-scores", label: "실기배점표", icon: Dumbbell },
+    { href: "/inquiry-conv", label: "탐구 변환표", icon: BookOpen },
+    { href: "/highest-scores", label: "최고표점", icon: Target },
     { href: "/copy-year", label: "연도 복사", icon: Copy },
     { href: "/stats", label: "통계", icon: BarChart },
   ];
