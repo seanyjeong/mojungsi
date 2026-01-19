@@ -45,9 +45,18 @@ interface UniversityWithConv extends University {
 interface InquiryConvData {
   U_ID: number;
   year: number;
+  exam_type: string;
   사탐: Record<number, number>;
   과탐: Record<number, number>;
 }
+
+// 모의고사 종류
+const EXAM_TYPES = [
+  { value: "수능", label: "수능" },
+  { value: "9월모평", label: "9월모평" },
+  { value: "6월모평", label: "6월모평" },
+  { value: "3월모의고사", label: "3월모의" }
+];
 
 export default function InquiryConvPage() {
   const [year, setYear] = useState(2027);
@@ -62,8 +71,11 @@ export default function InquiryConvPage() {
 
   const [convData, setConvData] = useState<InquiryConvData | null>(null);
   const [selectedTrack, setSelectedTrack] = useState<"사탐" | "과탐">("사탐");
+  const [selectedExamType, setSelectedExamType] = useState("수능");
+  const [availableExamTypes, setAvailableExamTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -147,31 +159,72 @@ export default function InquiryConvPage() {
   }, [universities, universitiesWithConv, selectedInitial, selectedGun, searchTerm, showOnlyWithConv]);
 
   // Load inquiry conv data
-  const loadConvData = async (univ: University) => {
+  const loadConvData = async (univ: University, examType?: string) => {
     setSelectedUniv(univ);
     setMessage(null);
+    const et = examType || selectedExamType;
     try {
-      const res = await fetch(`${API_BASE}/admin/jungsi/inquiry-conv/${univ.U_ID}?year=${year}`);
+      const res = await fetch(`${API_BASE}/admin/jungsi/inquiry-conv/${univ.U_ID}?year=${year}&exam_type=${encodeURIComponent(et)}`);
       const data = await res.json();
       if (data.success) {
         setConvData(data.data);
+        setAvailableExamTypes(data.availableExamTypes || []);
       } else {
         // Initialize empty data
         setConvData({
           U_ID: univ.U_ID,
           year,
+          exam_type: et,
           사탐: {},
           과탐: {}
         });
+        setAvailableExamTypes([]);
       }
     } catch (error) {
       console.error("Failed to load conv data:", error);
       setConvData({
         U_ID: univ.U_ID,
         year,
+        exam_type: et,
         사탐: {},
         과탐: {}
       });
+      setAvailableExamTypes([]);
+    }
+  };
+
+  // 모의고사 변경 시 데이터 새로 로드
+  const handleExamTypeChange = (et: string) => {
+    setSelectedExamType(et);
+    if (selectedUniv) {
+      loadConvData(selectedUniv, et);
+    }
+  };
+
+  // 변환표 복사 (수능 → 다른 모의고사)
+  const handleCopyConv = async (toExamType: string) => {
+    if (!selectedUniv) return;
+    setCopying(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/admin/jungsi/inquiry-conv/${selectedUniv.U_ID}/copy?year=${year}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from: "수능", to: toExamType })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: "success", text: `수능 → ${toExamType} 복사 완료 (${data.count}건)` });
+        // 복사 후 해당 모의고사로 전환
+        handleExamTypeChange(toExamType);
+      } else {
+        setMessage({ type: "error", text: data.message || "복사 실패" });
+      }
+    } catch (error) {
+      console.error("Copy error:", error);
+      setMessage({ type: "error", text: "복사 중 오류 발생" });
+    } finally {
+      setCopying(false);
     }
   };
 
@@ -198,19 +251,22 @@ export default function InquiryConvPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          exam_type: selectedExamType,
           track: selectedTrack,
           scores: convData[selectedTrack]
         })
       });
       const data = await res.json();
       if (data.success) {
-        setMessage({ type: "success", text: `${selectedTrack} 변환표 저장 완료` });
+        setMessage({ type: "success", text: `${selectedExamType} ${selectedTrack} 변환표 저장 완료` });
         // Refresh universities with conv list
         const listRes = await fetch(`${API_BASE}/admin/jungsi/inquiry-conv-list?year=${year}`);
         const listData = await listRes.json();
         if (listData.success) {
           setUniversitiesWithConv(listData.list || []);
         }
+        // 저장 후 availableExamTypes 업데이트
+        loadConvData(selectedUniv, selectedExamType);
       } else {
         setMessage({ type: "error", text: "저장 실패" });
       }
@@ -541,7 +597,49 @@ export default function InquiryConvPage() {
               </div>
             </div>
 
-            {/* Track selector */}
+            {/* 모의고사 종류 선택 */}
+            <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">모의고사 종류</h3>
+                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                  {availableExamTypes.length > 0 && (
+                    <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                      {availableExamTypes.join(", ")} 입력됨
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {EXAM_TYPES.map((et) => (
+                  <button
+                    key={et.value}
+                    onClick={() => handleExamTypeChange(et.value)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
+                      selectedExamType === et.value
+                        ? "bg-indigo-600 text-white"
+                        : availableExamTypes.includes(et.value)
+                          ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200"
+                          : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"
+                    }`}
+                  >
+                    {et.label}
+                    {availableExamTypes.includes(et.value) && " ✓"}
+                  </button>
+                ))}
+              </div>
+              {/* 복사 버튼 - 수능 데이터가 있고 현재 다른 모의고사를 보고 있을 때 */}
+              {availableExamTypes.includes("수능") && selectedExamType !== "수능" && !availableExamTypes.includes(selectedExamType) && (
+                <button
+                  onClick={() => handleCopyConv(selectedExamType)}
+                  disabled={copying}
+                  className="mt-3 w-full py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 transition"
+                >
+                  {copying ? "복사 중..." : `수능 → ${selectedExamType} 변환표 복사`}
+                </button>
+              )}
+            </div>
+
+            {/* Track selector (사탐/과탐) */}
             <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
               <div className="flex gap-2">
                 <button
@@ -575,7 +673,9 @@ export default function InquiryConvPage() {
 
             {/* Conversion table */}
             <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
-              <h3 className="text-lg font-semibold mb-4">{selectedTrack} 백분위 → 변환표준점수</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                <span className="text-indigo-600">[{selectedExamType}]</span> {selectedTrack} 백분위 → 변환표준점수
+              </h3>
 
               <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
                 {percentiles.map((p) => (
@@ -621,7 +721,7 @@ export default function InquiryConvPage() {
                 className="ml-auto inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
               >
                 <Save className="w-5 h-5" />
-                {saving ? "저장 중..." : `${selectedTrack} 변환표 저장`}
+                {saving ? "저장 중..." : `${selectedExamType} ${selectedTrack} 저장`}
               </button>
             </div>
           </>
