@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // 제목과 내용 파싱
-    const titleMatch = content.match(/제목:\s*(.+?)(?:\n|내용:)/s);
+    const titleMatch = content.match(/제목:\s*(.+?)(?:\n|내용:)/);
     const contentMatch = content.match(/내용:\s*([\s\S]+)/);
 
     const title = titleMatch ? titleMatch[1].trim() : "";
