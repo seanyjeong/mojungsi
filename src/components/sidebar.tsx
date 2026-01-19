@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Copy, BarChart, LogOut, Dumbbell, BookOpen, Target } from "lucide-react";
+import { Building2, Copy, BarChart, LogOut, Dumbbell, BookOpen, Target, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export function Sidebar() {
@@ -24,6 +24,7 @@ export function Sidebar() {
     { href: "/practical-scores", label: "실기배점표", icon: Dumbbell },
     { href: "/inquiry-conv", label: "탐구 변환표", icon: BookOpen },
     { href: "/highest-scores", label: "최고표점", icon: Target },
+    { href: "/notices", label: "공지사항", icon: Bell },
     { href: "/copy-year", label: "연도 복사", icon: Copy },
     { href: "/stats", label: "통계", icon: BarChart },
   ];
@@ -73,7 +74,7 @@ export function Sidebar() {
             <LogOut className="w-5 h-5" />
           </button>
         </div>
-        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">v0.2.3</p>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">v0.2.6</p>
       </div>
     </aside>
   );

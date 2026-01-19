@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Settings, FileSpreadsheet, Percent, Settings2, Database, Calendar, Check } from "lucide-react";
+import { Settings, FileSpreadsheet, Percent, Settings2, Database, Calendar, Check, Bell } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
@@ -150,6 +150,22 @@ export default function Home() {
           </div>
           <p className="text-sm text-zinc-500">
             엑셀 파일로 여러 학과의 정보를 한번에 다운로드/업로드합니다.
+          </p>
+        </Link>
+
+        {/* 공지사항 */}
+        <Link
+          href="/notices"
+          className="group p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:border-yellow-500 dark:hover:border-yellow-500 transition"
+        >
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg group-hover:bg-yellow-200 dark:group-hover:bg-yellow-900/50 transition">
+              <Bell className="w-6 h-6 text-yellow-600" />
+            </div>
+            <h2 className="text-xl font-semibold">공지사항 관리</h2>
+          </div>
+          <p className="text-sm text-zinc-500">
+            학생용 앱에 표시될 공지사항을 작성하고 관리합니다.
           </p>
         </Link>
       </div>
