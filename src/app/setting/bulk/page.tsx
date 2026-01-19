@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Download, Upload, ArrowLeft, FileSpreadsheet, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import * as XLSX from "xlsx";
+import { downloadExcel, parseExcelFile, ExcelColumn } from "@/lib/excel-utils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
@@ -67,35 +67,44 @@ export default function BulkPage() {
 
       const data: ExportRow[] = json.data;
 
-      // Create workbook
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(data);
-
-      // Set column widths
-      ws["!cols"] = [
-        { wch: 8 },   // U_ID
-        { wch: 20 },  // 대학명
-        { wch: 30 },  // 학과명
-        { wch: 5 },   // 군
-        { wch: 8 },   // 형태
-        { wch: 8 },   // 모집정원
-        { wch: 8 },   // 수능비율
-        { wch: 8 },   // 내신비율
-        { wch: 8 },   // 실기비율
-        { wch: 8 },   // 총점
-        { wch: 6 },   // 국어
-        { wch: 6 },   // 수학
-        { wch: 6 },   // 영어
-        { wch: 6 },   // 탐구
-        { wch: 6 },   // 탐구수
-        { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, // 영1-9
-        { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 }, // 한1-9
+      // 컬럼 정의
+      const columns: ExcelColumn[] = [
+        { header: "U_ID", key: "U_ID", width: 8 },
+        { header: "대학명", key: "대학명", width: 20 },
+        { header: "학과명", key: "학과명", width: 30 },
+        { header: "군", key: "군", width: 5 },
+        { header: "형태", key: "형태", width: 8 },
+        { header: "모집정원", key: "모집정원", width: 8 },
+        { header: "수능비율", key: "수능비율", width: 8 },
+        { header: "내신비율", key: "내신비율", width: 8 },
+        { header: "실기비율", key: "실기비율", width: 8 },
+        { header: "총점", key: "총점", width: 8 },
+        { header: "국어", key: "국어", width: 6 },
+        { header: "수학", key: "수학", width: 6 },
+        { header: "영어", key: "영어", width: 6 },
+        { header: "탐구", key: "탐구", width: 6 },
+        { header: "탐구수", key: "탐구수", width: 6 },
+        { header: "영1", key: "영1", width: 6 },
+        { header: "영2", key: "영2", width: 6 },
+        { header: "영3", key: "영3", width: 6 },
+        { header: "영4", key: "영4", width: 6 },
+        { header: "영5", key: "영5", width: 6 },
+        { header: "영6", key: "영6", width: 6 },
+        { header: "영7", key: "영7", width: 6 },
+        { header: "영8", key: "영8", width: 6 },
+        { header: "영9", key: "영9", width: 6 },
+        { header: "한1", key: "한1", width: 6 },
+        { header: "한2", key: "한2", width: 6 },
+        { header: "한3", key: "한3", width: 6 },
+        { header: "한4", key: "한4", width: 6 },
+        { header: "한5", key: "한5", width: 6 },
+        { header: "한6", key: "한6", width: 6 },
+        { header: "한7", key: "한7", width: 6 },
+        { header: "한8", key: "한8", width: 6 },
+        { header: "한9", key: "한9", width: 6 },
       ];
 
-      XLSX.utils.book_append_sheet(wb, ws, "정시데이터");
-
-      // Download
-      XLSX.writeFile(wb, `정시데이터_${year}.xlsx`);
+      await downloadExcel(data, columns, `정시데이터_${year}.xlsx`, "정시데이터");
       setMessage({ type: "success", text: `${data.length}개 학과 데이터를 다운로드했습니다.` });
     } catch (error) {
       console.error("Download error:", error);
@@ -115,11 +124,8 @@ export default function BulkPage() {
     setUploadResult(null);
 
     try {
-      // Read file
-      const data = await file.arrayBuffer();
-      const wb = XLSX.read(data);
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws);
+      // Read file using exceljs
+      const rows = await parseExcelFile<Record<string, unknown>>(file);
 
       if (rows.length === 0) {
         setMessage({ type: "error", text: "엑셀 파일에 데이터가 없습니다." });

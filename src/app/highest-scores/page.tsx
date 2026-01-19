@@ -5,6 +5,13 @@ import { Save, Target } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
+// 기본 과목 목록 (API 응답이 비어있을 때 사용)
+const DEFAULT_SUBJECTS = {
+  주요: ["국어", "수학"],
+  사탐: ["생윤", "윤사", "한지", "사문", "정법", "세지", "동아시아사", "세계사", "경제"],
+  과탐: ["물리1", "물리2", "화학1", "화학2", "생명1", "생명2", "지학1", "지학2"],
+};
+
 interface HighestScore {
   id: number;
   과목명: string;
@@ -28,7 +35,21 @@ export default function HighestScoresPage() {
         const res = await fetch(`${API_BASE}/admin/jungsi/highest-scores?year=${year}&mohyung=${encodeURIComponent(mohyung)}`);
         const data = await res.json();
         if (data.success) {
-          setScores(data.scores || []);
+          if (data.scores && data.scores.length > 0) {
+            setScores(data.scores);
+          } else {
+            // API 응답이 비어있으면 기본 과목 템플릿 생성
+            const allSubjects = [
+              ...DEFAULT_SUBJECTS.주요,
+              ...DEFAULT_SUBJECTS.사탐,
+              ...DEFAULT_SUBJECTS.과탐,
+            ];
+            setScores(allSubjects.map((name, idx) => ({
+              id: -(idx + 1),  // 임시 음수 ID (새 데이터 표시)
+              과목명: name,
+              최고점: 0
+            })));
+          }
         } else {
           setMessage({ type: "error", text: "데이터 로드 실패" });
         }
@@ -120,8 +141,9 @@ export default function HighestScoresPage() {
               className="px-4 py-2 border rounded-lg bg-white dark:bg-zinc-700"
             >
               <option value="수능">수능</option>
-              <option value="6월모의">6월모의</option>
-              <option value="9월모의">9월모의</option>
+              <option value="9월모평">9월모평</option>
+              <option value="6월모평">6월모평</option>
+              <option value="3월모의고사">3월모의고사</option>
             </select>
           </div>
         </div>

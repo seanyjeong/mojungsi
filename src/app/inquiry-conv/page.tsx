@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search, Save, BookOpen, Download, Upload, Filter } from "lucide-react";
-import * as XLSX from "xlsx";
+import { downloadExcel, parseExcelFile, ExcelColumn } from "@/lib/excel-utils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
 
@@ -312,25 +312,20 @@ export default function InquiryConvPage() {
         변환표준점수: row.변환표준점수
       }));
 
-      const ws = XLSX.utils.json_to_sheet(wsData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "탐구변환표");
-
-      // 컬럼 너비 설정
-      ws["!cols"] = [
-        { wch: 8 },  // U_ID
-        { wch: 20 }, // 대학명
-        { wch: 25 }, // 학과명
-        { wch: 8 },  // 계열
-        { wch: 8 },  // 백분위
-        { wch: 12 }  // 변환표준점수
+      const columns: ExcelColumn[] = [
+        { header: "U_ID", key: "U_ID", width: 8 },
+        { header: "대학명", key: "대학명", width: 20 },
+        { header: "학과명", key: "학과명", width: 25 },
+        { header: "계열", key: "계열", width: 8 },
+        { header: "백분위", key: "백분위", width: 8 },
+        { header: "변환표준점수", key: "변환표준점수", width: 12 },
       ];
 
       const fileName = uid
         ? `탐구변환표_${selectedUniv?.대학명}_${selectedUniv?.학과명}_${year}.xlsx`
         : `탐구변환표_전체_${year}.xlsx`;
 
-      XLSX.writeFile(wb, fileName);
+      await downloadExcel(wsData, columns, fileName, "탐구변환표");
     } catch (error) {
       console.error("Excel download error:", error);
       alert("엑셀 다운로드 중 오류가 발생했습니다.");
@@ -346,17 +341,14 @@ export default function InquiryConvPage() {
     setMessage(null);
 
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<{
+      const jsonData = await parseExcelFile<{
         U_ID: number;
         대학명?: string;
         학과명?: string;
         계열: string;
         백분위: number;
         변환표준점수: number;
-      }>(sheet);
+      }>(file);
 
       if (!jsonData.length) {
         alert("데이터가 없습니다.");
