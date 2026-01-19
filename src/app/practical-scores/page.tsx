@@ -122,7 +122,7 @@ export default function PracticalScoresPage() {
     setSelectedUniv(univ);
     setMessage(null);
     try {
-      const res = await fetch(`${API_BASE}/admin/jungsi/practical/${univ.U_ID}/${year}`);
+      const res = await fetch(`${API_BASE}/admin/jungsi/practical/${univ.U_ID}?year=${year}`);
       const data = await res.json();
       if (data.success) {
         setPracticalScores(data.data || {});
@@ -214,19 +214,17 @@ export default function PracticalScoresPage() {
           if (row.isDeleted && row.id) {
             // Delete
             promises.push(
-              fetch(`${API_BASE}/admin/jungsi/practical/${row.id}`, {
+              fetch(`${API_BASE}/admin/jungsi/practical/item/${row.id}`, {
                 method: "DELETE"
               })
             );
           } else if (row.isNew && !row.isDeleted) {
             // Create
             promises.push(
-              fetch(`${API_BASE}/admin/jungsi/practical`, {
+              fetch(`${API_BASE}/admin/jungsi/practical/${selectedUniv.U_ID}?year=${year}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  U_ID: selectedUniv.U_ID,
-                  year,
                   event_name: eventName,
                   gender: row.gender,
                   record: row.record,
@@ -237,7 +235,7 @@ export default function PracticalScoresPage() {
           } else if (row.id && !row.isDeleted) {
             // Update
             promises.push(
-              fetch(`${API_BASE}/admin/jungsi/practical/${row.id}`, {
+              fetch(`${API_BASE}/admin/jungsi/practical/item/${row.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
