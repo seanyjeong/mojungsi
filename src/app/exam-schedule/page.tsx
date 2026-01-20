@@ -386,8 +386,8 @@ export default function ExamSchedulePage() {
                   forceExam ? "bg-red-500" : "bg-zinc-300 dark:bg-zinc-600"
                 }`}
               >
-                <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
-                  forceExam ? "translate-x-7" : "translate-x-0.5"
+                <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  forceExam ? "translate-x-[28px]" : "translate-x-0"
                 }`} />
               </button>
             </div>
