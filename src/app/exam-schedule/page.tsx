@@ -352,45 +352,87 @@ export default function ExamSchedulePage() {
             );
           })}
 
-          {/* Force Exam Setting */}
-          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-6 border border-amber-200 dark:border-amber-800">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
-              <div>
-                <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
-                  활성 시험 강제 설정
-                </h3>
-                <p className="text-sm text-amber-600 dark:text-amber-400">
-                  디버깅용 - 날짜 기반 자동 판단을 무시하고 특정 시험을 강제로 활성화합니다
-                </p>
+          {/* Debug Mode Setting */}
+          <div className={`rounded-xl p-6 border ${
+            forceExam
+              ? "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800"
+              : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+          }`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className={`w-5 h-5 ${forceExam ? "text-red-600" : "text-zinc-500"}`} />
+                <div>
+                  <h3 className={`text-lg font-semibold ${forceExam ? "text-red-800 dark:text-red-200" : "text-zinc-800 dark:text-zinc-200"}`}>
+                    디버깅 모드
+                  </h3>
+                  <p className={`text-sm ${forceExam ? "text-red-600 dark:text-red-400" : "text-zinc-500"}`}>
+                    {forceExam
+                      ? "⚠️ 학생 페이지에서 모든 시험 탭이 표시됩니다"
+                      : "날짜 기반으로 활성 시험이 자동 결정됩니다"}
+                  </p>
+                </div>
               </div>
+
+              {/* 디버깅 모드 토글 */}
+              <button
+                onClick={() => {
+                  if (forceExam) {
+                    setForceExam(null);
+                  } else {
+                    setForceExam("수능"); // 기본값
+                  }
+                }}
+                className={`relative w-14 h-7 rounded-full transition-colors ${
+                  forceExam ? "bg-red-500" : "bg-zinc-300 dark:bg-zinc-600"
+                }`}
+              >
+                <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  forceExam ? "translate-x-7" : "translate-x-0.5"
+                }`} />
+              </button>
             </div>
 
-            <div className="flex items-center gap-4">
-              <select
-                value={forceExam || "자동"}
-                onChange={(e) =>
-                  setForceExam(e.target.value === "자동" ? null : e.target.value)
-                }
-                className="px-4 py-2 border border-amber-300 rounded-lg bg-white dark:bg-zinc-700"
-              >
-                <option value="자동">자동 (날짜 기반)</option>
-                {EXAM_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+            {/* 디버깅 모드 ON일 때만 시험 선택 표시 */}
+            {forceExam && (
+              <div className="flex items-center gap-4 pt-4 border-t border-red-200 dark:border-red-800">
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">강제 활성화할 시험:</span>
+                <div className="flex gap-2">
+                  {EXAM_TYPES.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setForceExam(type)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        forceExam === type
+                          ? "bg-red-500 text-white"
+                          : "bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-red-100"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleSaveForceExam}
+                  disabled={saving}
+                  className="ml-auto flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  저장
+                </button>
+              </div>
+            )}
 
+            {/* 디버깅 모드 OFF일 때 저장 버튼 */}
+            {!forceExam && (
               <button
                 onClick={handleSaveForceExam}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition text-sm"
+                className="mt-2 flex items-center gap-2 px-4 py-2 bg-zinc-600 text-white rounded-lg hover:bg-zinc-700 disabled:opacity-50 transition text-sm"
               >
                 <Save className="w-4 h-4" />
-                강제 설정 저장
+                자동 모드로 저장
               </button>
-            </div>
+            )}
           </div>
         </div>
       )}
