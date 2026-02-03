@@ -3,19 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, Trash2, Edit2, Eye, EyeOff, Bell, AlertTriangle, Calendar, Sparkles, Loader2 } from "lucide-react";
+import { useToast } from "@/components/toast";
+import { useAuth } from "@/lib/auth";
+import { Notice } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
-
-interface Notice {
-  id: number;
-  title: string;
-  content: string;
-  type: "general" | "urgent" | "event";
-  is_active: boolean;
-  published_at: string | null;
-  created_at: string;
-  _count?: { reads: number };
-}
 
 const typeLabels = {
   general: { label: "일반", color: "bg-gray-100 text-gray-700" },
@@ -36,6 +28,8 @@ export default function NoticesPage() {
   });
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
+  const { error: toastError } = useToast();
+  const { token } = useAuth();
 
   // 목록 조회
   const fetchNotices = async () => {
@@ -64,7 +58,10 @@ export default function NoticesPage() {
 
       await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(form),
       });
 
@@ -125,12 +122,15 @@ export default function NoticesPage() {
     try {
       const res = await fetch("/api/ai", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ prompt: aiPrompt, type: form.type }),
       });
       const data = await res.json();
       if (data.error) {
-        alert(data.error);
+        toastError(data.error);
         return;
       }
       setForm({
@@ -141,7 +141,7 @@ export default function NoticesPage() {
       setAiPrompt("");
     } catch (error) {
       console.error(error);
-      alert("AI 생성 실패");
+      toastError("AI 생성 실패");
     } finally {
       setAiGenerating(false);
     }

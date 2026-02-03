@@ -1,7 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8900";
+
+/**
+ * Admin 토큰 검증
+ */
+async function verifyAdminToken(authHeader: string | null): Promise<boolean> {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/admin/auth/verify`, {
+      headers: { Authorization: authHeader },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // 인증 검증
+    const authHeader = request.headers.get("authorization");
+    const isValid = await verifyAdminToken(authHeader);
+    
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "인증이 필요합니다" },
+        { status: 401 }
+      );
+    }
+
     const { prompt, type } = await request.json();
 
     if (!prompt) {
@@ -19,7 +50,7 @@ export async function POST(request: NextRequest) {
 CHEJUMP는 체대입시 정시 환산점수를 계산해주는 온라인 서비스(웹/PWA 앱)입니다.
 
 서비스 설명:
-- 서비스명: CHEJUMP (체점프) - "체대" + "jump", "채점"과 발음이 비슷
+- 서비스명: CHEJUMP (체점프) - 체대 + jump, 채점과 발음이 비슷
 - 서비스 유형: 체대입시 정시 환산점수 계산 웹/앱 서비스 (학원 아님!)
 - 주요 기능: 수험생이 수능 성적(국어/수학/영어/탐구)과 실기 점수를 입력하면 각 대학별 환산점수를 자동 계산
 - 반영 데이터: 대학별 수능 반영비율, 등급 배점, 가산점, 실기 배점표 등
@@ -27,9 +58,9 @@ CHEJUMP는 체대입시 정시 환산점수를 계산해주는 온라인 서비�
 - 대상 사용자: 체대입시를 준비하는 수험생 (고3, N수생, 재수생)
 
 공지 작성 시 주의사항:
-- "학원", "수업", "강사", "등록", "수강" 등의 표현 절대 사용 금지
+- 학원, 수업, 강사, 등록, 수강 등의 표현 절대 사용 금지
 - CHEJUMP는 온라인 계산 서비스임을 명심
-- "서비스", "앱", "기능", "업데이트", "계산" 등의 표현 사용
+- 서비스, 앱, 기능, 업데이트, 계산 등의 표현 사용
 
 작성 규칙:
 1. 존댓말 사용 (합니다, 입니다 체)
